@@ -20,14 +20,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val localProperties = Properties()
-        val localFile = rootProject.file("local.properties")
+        val gradleProperties = Properties()
+        val gradleFile = rootProject.file("gradle.properties")
 
-        if (localFile.exists()) {
-            localProperties.load(localFile.inputStream())
+        if (gradleFile.exists()) {
+            gradleProperties.load(gradleFile.inputStream())
         }
 
-        val weatherApiKey = localProperties.getProperty("WEATHER_API_KEY") ?: ""
+        val weatherApiKey = gradleProperties.getProperty("WEATHER_API_KEY") ?: ""
 
         buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
     }
