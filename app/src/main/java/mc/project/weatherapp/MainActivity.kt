@@ -53,6 +53,7 @@ import androidx.media3.common.util.Log
 import coil3.compose.AsyncImage
 import mc.project.weatherapp.api.WeatherResponse
 import android.Manifest
+import mc.project.weatherapp.api.AirQuality
 
 // Activity
 class MainActivity : ComponentActivity() {
@@ -133,15 +134,60 @@ fun WeatherApp(
         Column(modifier = Modifier.padding(paddingValues)) {
             when (selectedTab) {
                 0 -> WeatherScreen(weather)
-                1 -> AirQualityScreen()
+                1 -> {
+                    // Check if weather data is available and in the Success state
+                    if (weather.value is NetworkResponse.Success) {
+                        AirQualityScreen((weather.value as NetworkResponse.Success<WeatherResponse>).data.current.air_quality)
+                    } else {
+                        // Handle the case where weather data is not available or is not in the Success state
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Weather data not available", color = Color.Gray)
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 @Composable
-fun AirQualityScreen() {
-    TODO("Not yet implemented")
+fun AirQualityScreen(airQuality: AirQuality) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Air Quality Index", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+        AirQualityParameter(label = "CO (Carbon Monoxide)", value = airQuality.co.toString())
+        AirQualityParameter(label = "NO₂ (Nitrogen Dioxide)", value = airQuality.no2.toString())
+        AirQualityParameter(label = "O₃ (Ozone)", value = airQuality.o3.toString())
+        AirQualityParameter(label = "PM10 (Particulate Matter <10µm)", value = airQuality.pm10.toString())
+        AirQualityParameter(label = "PM2.5 (Particulate Matter <2.5µm)", value = airQuality.pm2_5.toString())
+        AirQualityParameter(label = "SO₂ (Sulfur Dioxide)", value = airQuality.so2.toString())
+        AirQualityParameter(label = "US EPA Index", value = airQuality.us_epa_index.toString())
+        AirQualityParameter(label = "GB DEFRA Index", value = airQuality.gb_defra_index.toString())
+    }
 }
+
+@Composable
+fun AirQualityParameter(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, fontWeight = FontWeight.SemiBold)
+        Text(text = value)
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

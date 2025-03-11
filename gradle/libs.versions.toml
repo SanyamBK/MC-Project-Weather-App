@@ -1,7 +1,7 @@
 [versions]
 agp = "8.9.0"
 coilCompose = "3.1.0"
-composeBomVersion = "2024.02.00"
+composeBomVersion = "2025.02.00"
 converterGson = "2.11.0"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -10,7 +10,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2024.04.01"
+composeBom = "2025.02.00"
 loggingInterceptor = "4.11.0"
 material3 = "1.3.1"
 runtimeLivedata = "1.7.8"
@@ -21,6 +21,7 @@ media3CommonKtx = "1.5.1"
 
 [libraries]
 activity-compose = { module = "androidx.activity:activity-compose" }
+#noinspection SimilarGradleDependency
 androidx-compose-bom-v20240200 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +35,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+#noinspection SimilarGradleDependency
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
