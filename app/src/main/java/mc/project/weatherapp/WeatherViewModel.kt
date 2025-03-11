@@ -7,12 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import mc.project.weatherapp.api.WeatherApiService
-import mc.project.weatherapp.api.WeatherResponse
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import mc.project.weatherapp.BuildConfig
 import mc.project.weatherapp.api.NetworkResponse
+import mc.project.weatherapp.api.WeatherResponse
+
 
 
 class WeatherViewModel : ViewModel() {
@@ -34,6 +35,7 @@ class WeatherViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     response.body()?.let {
                         _weatherState.value = NetworkResponse.Success(it)
+
                     }
 
                 } else {

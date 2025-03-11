@@ -50,17 +50,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
-import coil3.compose.AsyncImage
-import mc.project.weatherapp.api.WeatherResponse
 import android.Manifest
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.runtime.State
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import mc.project.weatherapp.api.AirQuality
+import mc.project.weatherapp.api.Forecast
+import mc.project.weatherapp.api.Hour
+import mc.project.weatherapp.api.WeatherResponse
 
 // Activity
 class MainActivity : ComponentActivity() {
-    private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         // In MainActivity
         setContent {
             val viewModel: WeatherViewModel = viewModel()
@@ -73,7 +88,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WeatherApp(
     viewModel: WeatherViewModel,
-    fusedLocationClient : com.google.android.gms.location.FusedLocationProviderClient,
+    fusedLocationClient : FusedLocationProviderClient,
     activity: ComponentActivity // Accept the activity context
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -146,6 +161,19 @@ fun WeatherApp(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text("Weather data not available", color = Color.Gray)
+                        }
+                    }
+                }
+                2 -> {
+                    if (weather.value is NetworkResponse.Success) {
+                        ForecastScreen((weather.value as NetworkResponse.Success<WeatherResponse>).data.forecast)
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Forecast data not available", color = Color.Gray)
                         }
                     }
                 }
@@ -232,11 +260,17 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             selected = selectedTab == 1,
             onClick = { onTabSelected(1) }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.DateRange, contentDescription = "Forecast") },
+            label = { Text("Forecast") },
+            selected = selectedTab == 2,
+            onClick = { onTabSelected(2) }
+        )
     }
 }
 
 @Composable
-fun WeatherScreen(weather: androidx.compose.runtime.State<NetworkResponse<WeatherResponse>?>) {
+fun WeatherScreen(weather: State<NetworkResponse<WeatherResponse>?>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -265,6 +299,7 @@ fun WeatherScreen(weather: androidx.compose.runtime.State<NetworkResponse<Weathe
 
 @Composable
 fun WeatherCard(data: WeatherResponse) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -297,8 +332,9 @@ fun WeatherCard(data: WeatherResponse) {
         AsyncImage(
             modifier = Modifier.size(160.dp),
             model = "https:${data.current.condition.icon}".replace("64x64","128x128"),
-            contentDescription = "Condition icon"
+            contentDescription = "Condition icon",
         )
+
         Text(
             text = data.current.condition.text,
             fontSize = 20.sp,
@@ -314,15 +350,15 @@ fun WeatherCard(data: WeatherResponse) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    WeatherKeyVal("Humidity",data.current.humidity)
-                    WeatherKeyVal("Wind Speed",data.current.wind_kph+" km/h")
+                    WeatherKeyVal("Humidity", data.current.humidity.toString())
+                    WeatherKeyVal("Wind Speed",data.current.wind_kph.toString() +" km/h")
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    WeatherKeyVal("UV",data.current.uv)
-                    WeatherKeyVal("Participation",data.current.precip_mm+" mm")
+                    WeatherKeyVal("UV", data.current.uv.toString())
+                    WeatherKeyVal("Participation",data.current.precip_mm.toString() +" mm")
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -348,5 +384,64 @@ fun WeatherKeyVal(key : String, value : String) {
     ) {
         Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Text(text = key, fontWeight = FontWeight.SemiBold, color = Color.Gray)
+    }
+}
+
+@Composable
+fun ForecastScreen(forecast: Forecast) {
+    var selectedDayIndex by remember { mutableStateOf(0) }
+    val forecastDays = forecast.forecastday
+    val selectedDay = forecastDays.getOrNull(selectedDayIndex)
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        selectedDay?.let { day ->
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                items(day.hour) { hour ->
+                    HourlyWeatherCard(hour)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                itemsIndexed(forecastDays) { index, forecastDay ->
+                    DayCard(
+                        date = forecastDay.date,
+                        isSelected = index == selectedDayIndex,
+                        onClick = { selectedDayIndex = index }
+                    )
+                }
+            }
+        } ?: run {
+            Text("Forecast data not available", color = Color.Gray, modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+    }
+}
+
+@Composable
+fun HourlyWeatherCard(hour: Hour) {
+    Column(
+        modifier = Modifier.padding(8.dp).background(Color.LightGray, RoundedCornerShape(8.dp)).padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(hour.time.substringAfter(" "), fontWeight = FontWeight.Bold)
+        AsyncImage(
+            modifier = Modifier.size(160.dp),
+            model = "https:${hour.condition.icon}",
+            contentDescription = "Condition icon"
+        )
+        Text("${hour.temp_c}°C")
+
+    }
+}
+
+@Composable
+fun DayCard(date: String, isSelected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .background(if (isSelected) Color.Blue else Color.Gray, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(8.dp)
+    ) {
+        Text(date, color = Color.White)
     }
 }

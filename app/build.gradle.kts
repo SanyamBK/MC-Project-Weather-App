@@ -87,5 +87,6 @@ dependencies {
     implementation(libs.converter.gson) // JSON converter
     implementation(libs.logging.interceptor) // For debugging API calls
     implementation(libs.androidx.runtime.livedata) // For Live data at runtime
-    implementation(libs.coil.compose) // For Image loading
+    implementation(libs.coil.kt.coil.compose) // For Image loading
+
 }
