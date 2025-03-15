@@ -53,7 +53,7 @@ Weather App/
 
 ## **4. Main Components**
 ### **Activities & ViewModel**
-- **MainActivity.kt**: Serves as the entry point for the application.
+- **MainActivity.kt**: Serves as the entry point for the application and has all the major activity fragments.
 - **WeatherViewModel.kt**: Manages API calls and UI-related data.
 - **WeatherScreen.kt**: Displays the current weather and includes the search feature.
 - **ForecastScreen.kt**: Displays the hourly and weekly weather forecast.
@@ -64,11 +64,6 @@ Weather App/
 - **Current.kt, Condition.kt, Forecast.kt, AirQuality.kt, etc.**: Models different parts of the response.
 - **WeatherApiService.kt**: Handles API calls to fetch weather data.
 
-### **UI Components** (Located in `ui/` folder)
-- **WeatherScreen.kt**: Displays the current weather and includes search functionality.
-- **ForecastScreen.kt**: Shows hourly and weekly forecasts.
-- **AirQualityScreen.kt**: Displays AQI and air pollution data.
-- **WeatherIcon.kt**: Loads and displays weather condition icons.
 
 ## **5. API Integration**
 The app fetches weather data using WeatherAPI, making network requests through the **WeatherViewModel**. The API response is parsed into data models and displayed using Jetpack Compose UI components.
