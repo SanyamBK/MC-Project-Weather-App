@@ -38,10 +38,6 @@ Weather App/
 │   │   │   │   │   ├── NetworkResponse.kt
 │   │   │   │   │   ├── WeatherApiService.kt
 │   │   │   │   │   ├── WeatherResponse.kt
-│   │   │   │   ├── WeatherScreen.kt (Includes Search Functionality)
-│   │   │   │   ├── AirQualityScreen.kt
-│   │   │   │   ├── ForecastScreen.kt
-│   │   │   │   ├── WeatherIcon.kt
 │   ├── build.gradle.kts
 │   ├── proguard-rules.pro
 │── build.gradle.kts
