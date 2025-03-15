@@ -160,7 +160,7 @@ fun WeatherApp(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("Weather data not available", color = Color.Gray)
+                            Text("AQI data not available", color = Color.Gray)
                         }
                     }
                 }
