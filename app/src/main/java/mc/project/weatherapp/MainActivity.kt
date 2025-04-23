@@ -177,6 +177,22 @@ fun WeatherApp(
                         }
                     }
                 }
+                3 -> {
+                    if (weather.value is NetworkResponse.Success) {
+                        val apiCondition = (weather.value as NetworkResponse.Success<WeatherResponse>)
+                            .data.current.condition.text.lowercase()
+
+                        val generalCondition = when {
+                            apiCondition.contains("rain") -> "Rain"
+                            apiCondition.contains("sunny") || apiCondition.contains("clear") -> "Sunny"
+                            apiCondition.contains("cloud") -> "Cloudy"
+                            apiCondition.contains("snow") || apiCondition.contains("cold") -> "Winter"
+                            apiCondition.contains("storm") || apiCondition.contains("thunder") -> "Storm"
+                            else -> "General"
+                        }
+                        MusicSuggestionsScreen(generalCondition)
+                    }
+                }
             }
         }
     }
@@ -265,6 +281,12 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             label = { Text("Forecast") },
             selected = selectedTab == 2,
             onClick = { onTabSelected(2) }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Search, "Music") }, // Replace with music icon
+            label = { Text("Mausam Beats") },
+            selected = selectedTab == 3,
+            onClick = { onTabSelected(3) }
         )
     }
 }
