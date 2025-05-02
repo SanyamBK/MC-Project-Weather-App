@@ -79,6 +79,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Switch
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.layout.ContentScale
 
 // Activity
 class MainActivity : ComponentActivity() {
@@ -520,20 +522,90 @@ fun ForecastScreen(forecast: Forecast) {
     }
 }
 
+//@Composable
+//fun HourlyWeatherCard(hour: Hour) {
+//    Column(
+//        modifier = Modifier.padding(8.dp).background(Color.LightGray, RoundedCornerShape(8.dp)).padding(8.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text(hour.time.substringAfter(" "), fontWeight = FontWeight.Bold)
+//        AsyncImage(
+//            modifier = Modifier.size(160.dp),
+//            model = "https:${hour.condition.icon}",
+//            contentDescription = "Condition icon"
+//        )
+//        Text("${hour.temp_c}°C")
+//
+//    }
+//}
+//@Composable
+//fun HourlyWeatherCard(hour: Hour) {
+//    Column(
+//        modifier = Modifier
+//            .padding(8.dp)
+//            .background(
+//                color = MaterialTheme.colorScheme.surfaceVariant,
+//                shape = RoundedCornerShape(8.dp)
+//            )
+//            .padding(8.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text(
+//            text = hour.time.substringAfter(" "),
+//            fontWeight = FontWeight.Bold,
+//            color = MaterialTheme.colorScheme.onSurfaceVariant
+//        )
+//        AsyncImage(
+//            modifier = Modifier.size(160.dp),
+//            model = "https:${hour.condition.icon}",
+//            contentDescription = "Condition icon"
+//        )
+//        Text(
+//            text = "${hour.temp_c}°C",
+//            color = MaterialTheme.colorScheme.onSurfaceVariant
+//        )
+//    }
+//}
+
 @Composable
 fun HourlyWeatherCard(hour: Hour) {
     Column(
-        modifier = Modifier.padding(8.dp).background(Color.LightGray, RoundedCornerShape(8.dp)).padding(8.dp),
+        modifier = Modifier
+            .padding(8.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(hour.time.substringAfter(" "), fontWeight = FontWeight.Bold)
-        AsyncImage(
-            modifier = Modifier.size(160.dp),
-            model = "https:${hour.condition.icon}",
-            contentDescription = "Condition icon"
+        Text(
+            text = hour.time.substringAfter(" "),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Text("${hour.temp_c}°C")
 
+        // Weather icon
+        val iconRes = when {
+            hour.condition.text.contains("sun", ignoreCase = true) -> R.drawable.weather_sunny
+            hour.condition.text.contains("rain", ignoreCase = true) -> R.drawable.weather_pouring
+            hour.condition.text.contains("cloud", ignoreCase = true) -> R.drawable.weather_cloudy
+            hour.condition.text.contains("snow", ignoreCase = true) -> R.drawable.weather_snowy_heavy
+            hour.condition.text.contains("thunder", ignoreCase = true) -> R.drawable.weather_dust
+            else -> R.drawable.weather_default
+        }
+
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = "Weather condition",
+            modifier = Modifier.size(48.dp),
+            contentScale = ContentScale.Fit
+        )
+
+        Text(
+            text = "${hour.temp_c}°C",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
