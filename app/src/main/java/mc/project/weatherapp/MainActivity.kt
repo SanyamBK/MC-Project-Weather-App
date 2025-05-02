@@ -60,8 +60,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.State
 import androidx.compose.ui.res.painterResource
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -69,6 +71,14 @@ import mc.project.weatherapp.api.AirQuality
 import mc.project.weatherapp.api.Forecast
 import mc.project.weatherapp.api.Hour
 import mc.project.weatherapp.api.WeatherResponse
+import mc.project.weatherapp.ui.theme.WeatherTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Switch
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Switch
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 
 // Activity
 class MainActivity : ComponentActivity() {
@@ -77,14 +87,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         // In MainActivity
+//        setContent {
+//            val viewModel: WeatherViewModel = viewModel()
+//            WeatherApp(viewModel, fusedLocationClient, this@MainActivity)
+//        }
+
         setContent {
             val viewModel: WeatherViewModel = viewModel()
-            WeatherApp(viewModel, fusedLocationClient, this@MainActivity)
+            val isDarkMode by viewModel.darkModeEnabled.observeAsState(false)
+
+            WeatherTheme(
+                darkTheme = isDarkMode, // Use the observed dark mode state
+                dynamicColor = true
+            ) {
+                WeatherApp(viewModel, fusedLocationClient, this@MainActivity)
+            }
         }
 
     }
 }
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun WeatherApp(
     viewModel: WeatherViewModel,
@@ -233,15 +256,72 @@ fun AirQualityParameter(label: String, value: String) {
 }
 
 
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun WeatherTopBar(viewModel: WeatherViewModel) {
+//    var showSearch by remember { mutableStateOf(false) }
+//    var city by remember { mutableStateOf("") }
+//
+//    TopAppBar(
+//        title = { Text("Weather App") },
+//        actions = {
+//            if (showSearch) {
+//                TextField(
+//                    value = city,
+//                    onValueChange = { city = it },
+//                    placeholder = { Text("Enter city") },
+//                    modifier = Modifier.padding(8.dp)
+//                )
+//                Button(onClick = { viewModel.fetchWeather(city); showSearch = false }) {
+//                    Text("Go")
+//                }
+//            } else {
+//                IconButton(onClick = { showSearch = true }) {
+//                    Icon(Icons.Default.Search, contentDescription = "Search")
+//                }
+//            }
+//        }
+//    )
+//}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherTopBar(viewModel: WeatherViewModel) {
     var showSearch by remember { mutableStateOf(false) }
     var city by remember { mutableStateOf("") }
+    var showMenu by remember { mutableStateOf(false) }
+    val darkModeEnabled by viewModel.darkModeEnabled.observeAsState(false)
 
     TopAppBar(
         title = { Text("Weather App") },
+        navigationIcon = {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
+//                Icon(
+//                    painter = painterResource(R.drawable.img), // Add your settings icon
+//                    contentDescription = "Settings"
+//                )
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Dark Mode")
+                                Spacer(Modifier.width(8.dp))
+                                Switch(
+                                    checked = darkModeEnabled,
+                                    onCheckedChange = { viewModel.toggleDarkMode(it) }
+                                )
+                            }
+                        },
+                        onClick = { viewModel.toggleDarkMode(!darkModeEnabled) }
+                    )
+                }
+            }
+        },
         actions = {
+            // Your existing search UI
             if (showSearch) {
                 TextField(
                     value = city,
@@ -249,7 +329,10 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
                     placeholder = { Text("Enter city") },
                     modifier = Modifier.padding(8.dp)
                 )
-                Button(onClick = { viewModel.fetchWeather(city); showSearch = false }) {
+                Button(onClick = {
+                    viewModel.fetchWeather(city)
+                    showSearch = false
+                }) {
                     Text("Go")
                 }
             } else {
@@ -260,7 +343,6 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
         }
     )
 }
-
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     NavigationBar {

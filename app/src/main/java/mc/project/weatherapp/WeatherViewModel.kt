@@ -24,6 +24,13 @@ class WeatherViewModel : ViewModel() {
 
     private val apiService = retrofit.create(WeatherApiService::class.java)
 
+    private val _darkModeEnabled = MutableLiveData(false)
+    val darkModeEnabled: LiveData<Boolean> = _darkModeEnabled
+
+    fun toggleDarkMode(enabled: Boolean) {
+        _darkModeEnabled.value = enabled
+    }
+
     // Use LiveData
     private val _weatherState = MutableLiveData<NetworkResponse<WeatherResponse>>()
     val weatherState: LiveData<NetworkResponse<WeatherResponse>> = _weatherState
@@ -48,4 +55,5 @@ class WeatherViewModel : ViewModel() {
             }
         }
     }
+
 }
