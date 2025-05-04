@@ -7,119 +7,61 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import mc.project.weatherapp.api.NetworkResponse
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.util.Log
-import android.Manifest
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.State
-import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import mc.project.weatherapp.api.AirQuality
-import mc.project.weatherapp.api.Forecast
-import mc.project.weatherapp.api.Hour
-import android.location.Geocoder
+import mc.project.weatherapp.api.*
+import mc.project.weatherapp.ui.theme.WeatherTheme
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Place
-//import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.platform.LocalContext
-import mc.project.weatherapp.api.WeatherResponse
-import mc.project.weatherapp.ui.theme.WeatherTheme
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Switch
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material3.Switch
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.ui.viewinterop.AndroidView
-import java.util.Locale
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.layout.ContentScale
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 
-// Activity
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        // In MainActivity
-//        setContent {
-//            val viewModel: WeatherViewModel = viewModel()
-//            WeatherApp(viewModel, fusedLocationClient, this@MainActivity)
-//        }
-
         setContent {
             val viewModel: WeatherViewModel = viewModel()
             val isDarkMode by viewModel.darkModeEnabled.observeAsState(false)
-
             WeatherTheme(
-                darkTheme = isDarkMode, // Use the observed dark mode state
+                darkTheme = isDarkMode,
                 dynamicColor = true
             ) {
                 WeatherApp(viewModel, fusedLocationClient, this@MainActivity)
             }
         }
-
     }
 }
 
@@ -127,25 +69,23 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WeatherApp(
     viewModel: WeatherViewModel,
-    fusedLocationClient : FusedLocationProviderClient,
-    activity: ComponentActivity // Accept the activity context
+    fusedLocationClient: FusedLocationProviderClient,
+    activity: ComponentActivity
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val weather = viewModel.weatherState.observeAsState()
     var currentLocation by remember { mutableStateOf<Location?>(null) }
 
-    // Location permission launcher
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                // Permission granted, get location
                 if (ActivityCompat.checkSelfPermission(
-                        activity, // Use the passed activity context
-                        Manifest.permission.ACCESS_FINE_LOCATION
+                        activity,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                         activity,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return@rememberLauncherForActivityResult
@@ -156,23 +96,17 @@ fun WeatherApp(
                             currentLocation = it
                         }
                     }
-            } else {
-                // Permission denied
-                Log.e("Location", "Permission denied")
             }
         }
     )
 
-
-    // Request location permission on launch
     LaunchedEffect(key1 = true) {
-        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    // Fetch weather for current location if available
     LaunchedEffect(key1 = currentLocation) {
         currentLocation?.let {
-            viewModel.fetchWeather(it.latitude.toString() + "," + it.longitude.toString())
+            viewModel.fetchWeather("${it.latitude},${it.longitude}")
         }
     }
 
@@ -189,21 +123,6 @@ fun WeatherApp(
             when (selectedTab) {
                 0 -> WeatherScreen(weather)
                 1 -> {
-                    // Check if weather data is available and in the Success state
-                    if (weather.value is NetworkResponse.Success) {
-                        AirQualityScreen((weather.value as NetworkResponse.Success<WeatherResponse>).data.current.air_quality)
-                    } else {
-                        // Handle the case where weather data is not available or is not in the Success state
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text("AQI data not available", color = Color.Gray)
-                        }
-                    }
-                }
-                2 -> {
                     if (weather.value is NetworkResponse.Success) {
                         ForecastScreen((weather.value as NetworkResponse.Success<WeatherResponse>).data.forecast)
                     } else {
@@ -212,15 +131,17 @@ fun WeatherApp(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("Forecast data not available", color = Color.Gray)
+                            Text(
+                                text = "Forecast data not available",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
-                3 -> {
+                2 -> {
                     if (weather.value is NetworkResponse.Success) {
                         val apiCondition = (weather.value as NetworkResponse.Success<WeatherResponse>)
                             .data.current.condition.text.lowercase()
-
                         val generalCondition = when {
                             apiCondition.contains("rain") -> "Rain"
                             apiCondition.contains("sunny") || apiCondition.contains("clear") -> "Sunny"
@@ -232,17 +153,20 @@ fun WeatherApp(
                         MusicSuggestionsScreen(generalCondition)
                     }
                 }
-                4 -> {
+                3 -> {
                     val city = viewModel.currentCity
                     if (city != null) {
-                        WeatherNewsScreen(city)
+                        WeatherNewsScreen(city, viewModel.darkModeEnabled.observeAsState().value ?: false)
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("Location data not available", color = Color.Gray)
+                            Text(
+                                text = "Location data not available",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -251,9 +175,8 @@ fun WeatherApp(
     }
 }
 
-
 @Composable
-fun WeatherNewsScreen(city: String) {
+fun WeatherNewsScreen(city: String, isDarkMode: Boolean) {
     val context = LocalContext.current
     val query = "weather news ${city.lowercase()}"
     val url = "https://www.google.com/search?q=${Uri.encode(query)}&tbm=nws"
@@ -263,75 +186,51 @@ fun WeatherNewsScreen(city: String) {
             WebView(context).apply {
                 webViewClient = WebViewClient()
                 settings.javaScriptEnabled = true
+
+                // Dark mode configuration
+                when {
+                    WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING) -> {
+                        WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, isDarkMode)
+                    }
+                    WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) -> {
+                        WebSettingsCompat.setForceDark(
+                            settings,
+                            if (isDarkMode) WebSettingsCompat.FORCE_DARK_ON
+                            else WebSettingsCompat.FORCE_DARK_OFF
+                        )
+                    }
+                }
+
+                // Preferred dark strategy
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
+                    WebSettingsCompat.setForceDarkStrategy(
+                        settings,
+                        WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY
+                    )
+                }
+
                 loadUrl(url)
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        update = { webView ->
+            // Update dark mode without reloading
+            when {
+                WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING) -> {
+                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, isDarkMode)
+                }
+                WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) -> {
+                    WebSettingsCompat.setForceDark(
+                        webView.settings,
+                        if (isDarkMode) WebSettingsCompat.FORCE_DARK_ON
+                        else WebSettingsCompat.FORCE_DARK_OFF
+                    )
+                }
+            }
+        }
     )
 }
 
-@Composable
-fun AirQualityScreen(airQuality: AirQuality) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Air Quality Index", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-        AirQualityParameter(label = "CO (Carbon Monoxide)", value = airQuality.co.toString())
-        AirQualityParameter(label = "NO₂ (Nitrogen Dioxide)", value = airQuality.no2.toString())
-        AirQualityParameter(label = "O₃ (Ozone)", value = airQuality.o3.toString())
-        AirQualityParameter(label = "PM10 (Particulate Matter <10µm)", value = airQuality.pm10.toString())
-        AirQualityParameter(label = "PM2.5 (Particulate Matter <2.5µm)", value = airQuality.pm2_5.toString())
-        AirQualityParameter(label = "SO₂ (Sulfur Dioxide)", value = airQuality.so2.toString())
-        AirQualityParameter(label = "US EPA Index", value = airQuality.us_epa_index.toString())
-        AirQualityParameter(label = "GB DEFRA Index", value = airQuality.gb_defra_index.toString())
-    }
-}
-
-@Composable
-fun AirQualityParameter(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = label, fontWeight = FontWeight.SemiBold)
-        Text(text = value)
-    }
-}
-
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun WeatherTopBar(viewModel: WeatherViewModel) {
-//    var showSearch by remember { mutableStateOf(false) }
-//    var city by remember { mutableStateOf("") }
-//
-//    TopAppBar(
-//        title = { Text("Weather App") },
-//        actions = {
-//            if (showSearch) {
-//                TextField(
-//                    value = city,
-//                    onValueChange = { city = it },
-//                    placeholder = { Text("Enter city") },
-//                    modifier = Modifier.padding(8.dp)
-//                )
-//                Button(onClick = { viewModel.fetchWeather(city); showSearch = false }) {
-//                    Text("Go")
-//                }
-//            } else {
-//                IconButton(onClick = { showSearch = true }) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search")
-//                }
-//            }
-//        }
-//    )
-//}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherTopBar(viewModel: WeatherViewModel) {
@@ -344,21 +243,20 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
 
     Column {
         TopAppBar(
-            title = { Text("Weather") },
+            title = { Text("Weather", style = MaterialTheme.typography.titleLarge) },
             navigationIcon = {
                 IconButton(onClick = { showMenu = true }) {
                     Icon(Icons.Default.Settings, contentDescription = "Settings")
-                    //                Icon(
-                    //                    painter = painterResource(R.drawable.img), // Add your settings icon
-                    //                    contentDescription = "Settings"
-                    //                )
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
                             text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     Text("Dark Mode")
                                     Spacer(Modifier.width(8.dp))
                                     Switch(
@@ -382,7 +280,13 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
                         Icon(Icons.Default.Search, contentDescription = "Search")
                     }
                 }
-            }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         )
 
         if (showSearch) {
@@ -390,6 +294,7 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -406,12 +311,23 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
                         placeholder = { Text("Enter city") },
                         modifier = Modifier
                             .weight(1f)
-                            .padding(end = 8.dp)
+                            .padding(end = 8.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        )
                     )
-                    Button(onClick = {
-                        viewModel.fetchWeather(city)
-                        showSearch = false
-                    }) {
+                    Button(
+                        onClick = {
+                            viewModel.fetchWeather(city)
+                            showSearch = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
                         Text("Go")
                     }
                 }
@@ -448,7 +364,7 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remove",
                                     modifier = Modifier.size(16.dp),
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -461,36 +377,62 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
 
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
         NavigationBarItem(
             icon = { Icon(Icons.Default.LocationOn, contentDescription = "Weather") },
             label = { Text("Weather") },
             selected = selectedTab == 0,
-            onClick = { onTabSelected(0) }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Search, contentDescription = "Air Quality") },
-            label = { Text("Air Quality") },
-            selected = selectedTab == 1,
-            onClick = { onTabSelected(1) }
+            onClick = { onTabSelected(0) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.DateRange, contentDescription = "Forecast") },
             label = { Text("Forecast") },
-            selected = selectedTab == 2,
-            onClick = { onTabSelected(2) }
+            selected = selectedTab == 1,
+            onClick = { onTabSelected(1) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Search, "Music") }, // Replace with music icon
-            label = { Text("Mausam Beats") },
-            selected = selectedTab == 3,
-            onClick = { onTabSelected(3) }
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.MusicNote,
+                    contentDescription = "Music"
+                )
+            },
+            label = { Text("Music") },
+            selected = selectedTab == 2,
+            onClick = { onTabSelected(2) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Notifications, contentDescription = "News") },
             label = { Text("News") },
-            selected = selectedTab == 4,
-            onClick = { onTabSelected(4) }
+            selected = selectedTab == 3,
+            onClick = { onTabSelected(3) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         )
     }
 }
@@ -510,13 +452,13 @@ fun ErrorScreen(
         Icon(
             imageVector = Icons.Default.Place,
             contentDescription = null,
-            tint = Color.Gray,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(96.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = message,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
@@ -531,119 +473,272 @@ fun ErrorScreen(
 
 @Composable
 fun WeatherScreen(weather: State<NetworkResponse<WeatherResponse>?>) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        when (val result = weather.value) {
-            is NetworkResponse.Loading -> {
-                CircularProgressIndicator()
+        item {
+            when (val result = weather.value) {
+                is NetworkResponse.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is NetworkResponse.Success -> {
+                    WeatherCard(result.data)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    AirQualitySummary(result.data.current.air_quality)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    DrivingDifficulty(result.data.current)
+                }
+                is NetworkResponse.Error -> {
+                    ErrorScreen(message = "Error: ${result.message}")
+                }
+                null -> {
+                    ErrorScreen(message = "No data available")
+                }
             }
-
-            is NetworkResponse.Success -> {
-                WeatherCard(result.data)
-            }
-
-            is NetworkResponse.Error -> {
-                Text(text = "Error: ${result.message}", color = Color.Red)
-            }
-
-            null -> {}
         }
     }
 }
-
-
 
 @Composable
 fun WeatherCard(data: WeatherResponse) {
-
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(vertical = 8.dp)
+            .shadow(8.dp, RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.Bottom
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = "Location icon",
-                modifier = Modifier.size(40.dp)
-            )
-            Text(text = data.location.name, fontSize = 30.sp)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = data.location.country, fontSize = 18.sp, color = Color.Gray)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = " ${data.current.temp_c} ° c",
-            fontSize = 56.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        AsyncImage(
-            modifier = Modifier.size(160.dp),
-            model = "https:${data.current.condition.icon}".replace("64x64","128x128"),
-            contentDescription = "Condition icon",
-        )
-
-        Text(
-            text = data.current.condition.text,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            color = Color.Gray
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Card {
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    WeatherKeyVal("Humidity", data.current.humidity.toString())
-                    WeatherKeyVal("Wind Speed",data.current.wind_kph.toString() +" km/h")
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    WeatherKeyVal("UV", data.current.uv.toString())
-                    WeatherKeyVal("Participation",data.current.precip_mm.toString() +" mm")
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    WeatherKeyVal("Local Time",data.location.localtime.split(" ")[1])
-                    WeatherKeyVal("Local Date",data.location.localtime.split(" ")[0])
-                }
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Location icon",
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "${data.location.name}, ${data.location.country}",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            AsyncImage(
+                modifier = Modifier.size(120.dp),
+                model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
+                contentDescription = "Condition icon",
+                contentScale = ContentScale.Fit
+            )
+            Text(
+                text = "${data.current.temp_c}°C",
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = data.current.condition.text,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            WeatherInfoGrid(data)
         }
-
-
-
     }
-
 }
 
 @Composable
-fun WeatherKeyVal(key : String, value : String) {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+fun WeatherInfoGrid(data: WeatherResponse) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            WeatherKeyVal(
+                icon = Icons.Default.WaterDrop,
+                key = "Humidity",
+                value = "${data.current.humidity}%"
+            )
+            WeatherKeyVal(
+                icon = Icons.Default.Air,
+                key = "Wind",
+                value = "${data.current.wind_kph} km/h"
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            WeatherKeyVal(
+                icon = Icons.Default.LightMode,
+                key = "UV Index",
+                value = data.current.uv.toString()
+            )
+            WeatherKeyVal(
+                icon = Icons.Default.Water,
+                key = "Precipitation",
+                value = "${data.current.precip_mm} mm"
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            WeatherKeyVal(
+                icon = Icons.Default.WbSunny,
+                key = "Sunrise",
+                value = data.forecast.forecastday[0].astro.sunrise
+            )
+            WeatherKeyVal(
+                icon = Icons.Default.NightsStay,
+                key = "Sunset",
+                value = data.forecast.forecastday[0].astro.sunset
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherKeyVal(icon: ImageVector, key: String, value: String) {
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(text = key, fontWeight = FontWeight.SemiBold, color = Color.Gray)
+        Icon(
+            imageVector = icon,
+            contentDescription = key,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = value,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = key,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun AirQualitySummary(airQuality: AirQualityX) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .shadow(8.dp, RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.CloudQueue,
+                    contentDescription = "Air Quality",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Air Quality Index",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "US EPA Index: ${airQuality.us_epa_index}",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "PM2.5: ${airQuality.pm2_5} µg/m³",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+fun DrivingDifficulty(current: Current) {
+    val difficulty = when {
+        current.condition.text.lowercase().contains("rain") -> "Moderate (Rain)"
+        current.condition.text.lowercase().contains("snow") -> "High (Snow)"
+        current.condition.text.lowercase().contains("storm") -> "Severe (Storm)"
+        current.wind_kph > 50 -> "Moderate (High Winds)"
+        else -> "Low (Clear)"
+    }
+    val difficultyColor = when {
+        difficulty.contains("Severe") -> Color(0xFFFF0000)
+        difficulty.contains("Moderate") -> Color(0xFFFFA500)
+        else -> Color(0xFF4CAF50)
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .shadow(8.dp, RoundedCornerShape(16.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.DirectionsCar,
+                    contentDescription = "Driving Difficulty",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Driving Difficulty",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = difficulty,
+                fontSize = 16.sp,
+                color = difficultyColor
+            )
+        }
     }
 }
 
@@ -671,55 +766,14 @@ fun ForecastScreen(forecast: Forecast) {
                 }
             }
         } ?: run {
-            Text("Forecast data not available", color = Color.Gray, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(
+                text = "Forecast data not available",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
-
-//@Composable
-//fun HourlyWeatherCard(hour: Hour) {
-//    Column(
-//        modifier = Modifier.padding(8.dp).background(Color.LightGray, RoundedCornerShape(8.dp)).padding(8.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Text(hour.time.substringAfter(" "), fontWeight = FontWeight.Bold)
-//        AsyncImage(
-//            modifier = Modifier.size(160.dp),
-//            model = "https:${hour.condition.icon}",
-//            contentDescription = "Condition icon"
-//        )
-//        Text("${hour.temp_c}°C")
-//
-//    }
-//}
-//@Composable
-//fun HourlyWeatherCard(hour: Hour) {
-//    Column(
-//        modifier = Modifier
-//            .padding(8.dp)
-//            .background(
-//                color = MaterialTheme.colorScheme.surfaceVariant,
-//                shape = RoundedCornerShape(8.dp)
-//            )
-//            .padding(8.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Text(
-//            text = hour.time.substringAfter(" "),
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onSurfaceVariant
-//        )
-//        AsyncImage(
-//            modifier = Modifier.size(160.dp),
-//            model = "https:${hour.condition.icon}",
-//            contentDescription = "Condition icon"
-//        )
-//        Text(
-//            text = "${hour.temp_c}°C",
-//            color = MaterialTheme.colorScheme.onSurfaceVariant
-//        )
-//    }
-//}
 
 @Composable
 fun HourlyWeatherCard(hour: Hour) {
@@ -738,24 +792,12 @@ fun HourlyWeatherCard(hour: Hour) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
-        // Weather icon
-        val iconRes = when {
-            hour.condition.text.contains("sun", ignoreCase = true) -> R.drawable.weather_sunny
-            hour.condition.text.contains("rain", ignoreCase = true) -> R.drawable.weather_pouring
-            hour.condition.text.contains("cloud", ignoreCase = true) -> R.drawable.weather_cloudy
-            hour.condition.text.contains("snow", ignoreCase = true) -> R.drawable.weather_snowy_heavy
-            hour.condition.text.contains("thunder", ignoreCase = true) -> R.drawable.weather_dust
-            else -> R.drawable.weather_default
-        }
-
-        Image(
-            painter = painterResource(id = iconRes),
-            contentDescription = "Weather condition",
+        AsyncImage(
             modifier = Modifier.size(48.dp),
+            model = "https:${hour.condition.icon}".replace("64x64", "128x128"),
+            contentDescription = "Weather condition",
             contentScale = ContentScale.Fit
         )
-
         Text(
             text = "${hour.temp_c}°C",
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -768,10 +810,16 @@ fun DayCard(date: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(4.dp)
-            .background(if (isSelected) Color.Blue else Color.Gray, RoundedCornerShape(8.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                RoundedCornerShape(8.dp)
+            )
             .clickable { onClick() }
             .padding(8.dp)
     ) {
-        Text(date, color = Color.White)
+        Text(
+            text = date,
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

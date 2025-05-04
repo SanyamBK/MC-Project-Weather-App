@@ -6,3 +6,15 @@ data class WeatherResponse(
     val forecast: Forecast,
     val location: Location
 )
+
+
+
+
+
+
+
+
+
+
+
+
