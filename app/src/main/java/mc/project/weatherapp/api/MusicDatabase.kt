@@ -18,46 +18,52 @@ object MusicDatabase {
             SongSuggestion("Badtameez Dil", "Benny Dayal", "https://www.youtube.com/watch?v=e6cgsagaMRY"),
             SongSuggestion("Sunny Sunny", "Yo Yo Honey Singh", "https://www.youtube.com/watch?v=3154VyTIdqE"),
             SongSuggestion("Galti Se Mistake", "Arijit Singh", "https://www.youtube.com/watch?v=ROtv13CqjzU"),
-            SongSuggestion("Sham", "Amit Trivedi & Nikhil D'Souza", "https://www.youtube.com/watch?v=4Q46xYqUwZQ"),
+            SongSuggestion("Sham", "Amit Trivedi & Nikhil D'Souza", "https://youtu.be/fFyXcX-s0C8?si=Wf8XFhW8W1mDy9Rx"),
             SongSuggestion("Baliye Re", "Neeraj Shridhar", "https://www.youtube.com/watch?v=txInOsPt62E")
+
         ),
 
         "Cloudy" to listOf(
-            SongSuggestion("Kabira", "Arijit Singh", "https://www.youtube.com/watch?v=09SlNCQQ8kc"),
-            SongSuggestion("Tum Hi Ho", "Arijit Singh", "https://www.youtube.com/watch?v=VXARHLXj8a4"),
+            SongSuggestion("Kabira", "Arijit Singh", "https://youtu.be/6UPZo8PX9OI?si=qL71jRTpBwIwzp90"),
+            SongSuggestion("Tum Hi Ho", "Arijit Singh", "https://www.youtube.com/watch?v=Umqb9KENgmk"),
             SongSuggestion("Tujhe Bhula Diya", "Mohit Chauhan", "https://www.youtube.com/watch?v=SiU5dsCM5YM"),
-            SongSuggestion("Phir Le Aya Dil", "Arijit Singh", "https://www.youtube.com/watch?v=6S8tc7M3X2E"),
-            SongSuggestion("Raabta", "Arijit Singh", "https://www.youtube.com/watch?v=z_7tZkH3x8w"),
-            SongSuggestion("Agar Tum Saath Ho", "Alka Yagnik", "https://www.youtube.com/watch?v=6FURuLYrR_Q")
+            SongSuggestion("Phir Le Aya Dil", "Arijit Singh", "https://youtu.be/R4YeD7aoOmU?si=HEmMNHqqvsiUM2Ep"),
+            SongSuggestion("Raabta", "Arijit Singh", "https://youtu.be/iYy9kr45d1o?si=R3AMa4ks_1QiEKfB"),
+            SongSuggestion("Agar Tum Saath Ho", "Alka Yagnik & Arijit Singh", "https://youtu.be/sK7riqg2mr4?si=wJeR4zkUUOav8dYw")
+
         ),
 
         "Storm" to listOf(
-            SongSuggestion("Zinda", "Siddharth Basrur", "https://www.youtube.com/watch?v=4q9UafsiQ6k"),
-            SongSuggestion("Dhoom Again", "Vishal Dadlani", "https://www.youtube.com/watch?v=Y50t3hL0Z6A"),
-            SongSuggestion("Malang", "Vishal Dadlani", "https://www.youtube.com/watch?v=9G1QH7zZ_hw"),
-            SongSuggestion("Dhoom Machale", "Sunidhi Chauhan", "https://www.youtube.com/watch?v=4gLld7vKRB8"),
-            SongSuggestion("Chak Lein De", "Vishal Dadlani", "https://www.youtube.com/watch?v=0rFZ8XpzZ2w"),
-            SongSuggestion("Bhaag DK Bose", "Ram Sampath", "https://www.youtube.com/watch?v=3VoT5tFqG7Y")
+            SongSuggestion("Zinda", "Siddharth Mahadevan", "https://youtu.be/Ax0G_P2dSBw?si=TD25iN8ARZn1HxkU"),
+            SongSuggestion("Dhoom Again", "Vishal Dadlani", "https://www.youtube.com/watch?v=lP89_U3MBlU"),
+            SongSuggestion("Malang", "Siddharth Mahadevan & Shilpa Rao", "https://youtu.be/SxoTAvwCr4A?si=AwbvKtPgTwCvpNLR"),
+            SongSuggestion("Dhoom Machale", "Sunidhi Chauhan", "https://youtu.be/2uUmHTgT65I?si=nYwJAs5xsR3qTFN1"),
+            SongSuggestion("Chak Lein De", "Vishal Dadlani", "https://youtu.be/kd-6aw99DpA?si=da44ClpgdqL4RI4g"),
+            SongSuggestion("Bhaag DK Bose", "Ram Sampath", "https://youtu.be/vs1IDdap3X4?si=R-EX0Nkmxm5jyZ9z")
+
         ),
 
         "Winter" to listOf(
-            SongSuggestion("Sawan Aaya Hai", "Arko Pravo Mukherjee", "https://www.youtube.com/watch?v=6M3y89wg7U4"),
-            SongSuggestion("Chaiyya Chaiyya", "Sukhwinder Singh", "https://www.youtube.com/watch?v=kC5k6sRqeeM"),
-            SongSuggestion("Ishq Wala Love", "Neeti Mohan", "https://www.youtube.com/watch?v=3x1CL6qwTdA"),
-            SongSuggestion("Tum Se Hi", "Mohit Chauhan", "https://www.youtube.com/watch?v=3jD4uQO0K-Y"),
-            SongSuggestion("Dil Ibadat", "KK", "https://www.youtube.com/watch?v=Xh4U0124-YA"),
-            SongSuggestion("Tere Sang Yaara", "Atif Aslam", "https://www.youtube.com/watch?v=1H9hB4u0Kq4")
+            SongSuggestion("Sawan Aaya Hai", "Arko Pravo Mukherjee", "https://www.youtube.com/watch?v=Gh9b0OPdDDI"),
+            SongSuggestion("Chaiyya Chaiyya", "Sukhwinder Singh", "https://www.youtube.com/watch?v=9MX-QejdVaQ"),
+            SongSuggestion("Ishq Wala Love", "Neeti Mohan", "https://www.youtube.com/watch?v=wV-o_KugibY"),
+            SongSuggestion("Tum Se Hi", "Mohit Chauhan", "https://www.youtube.com/watch?v=I94fhjQ-U30"),
+            SongSuggestion("Dil Ibadat", "KK", "https://m.youtube.com/watch?v=pMRqHk_0Bw0&pp=ygUSI2RpbGliYWRhdGtycnJoYWhp"),
+            SongSuggestion("Tere Sang Yaara", "Atif Aslam", "https://www.youtube.com/watch?v=XT9sSinTvpk")
         ),
 
         "General" to listOf(
-            SongSuggestion("Gerua", "Arijit Singh", "https://www.youtube.com/watch?v=6S1y4ZqnDdQ"),
-            SongSuggestion("Kal Ho Naa Ho", "Sonu Nigam", "https://www.youtube.com/watch?v=9Oqg7dJg0X4"),
-            SongSuggestion("Ae Dil Hai Mushkil", "Arijit Singh", "https://www.youtube.com/watch?v=5-1nS6ZqdBE"),
-            SongSuggestion("Channa Mereya", "Arijit Singh", "https://www.youtube.com/watch?v=9J5bqKfazQU"),
-            SongSuggestion("Tera Ban Jaunga", "Akhil Sachdeva", "https://www.youtube.com/watch?v=7A7NX2dK-gE"),
-            SongSuggestion("Pehla Nasha", "Udit Narayan", "https://www.youtube.com/watch?v=3B1H8hDZ_7I")
+            SongSuggestion("Gerua", "Arijit Singh & Antara Mitra", "https://www.youtube.com/watch?v=2zoIA42nJJc&pp=0gcJCfcAhR29_xXO"),
+            SongSuggestion("Kal Ho Naa Ho", "Sonu Nigam", "https://www.youtube.com/watch?v=r_oBWnz7wLE"),
+            SongSuggestion("Ae Dil Hai Mushkil", "Arijit Singh", "https://youtu.be/6FURuLYrR_Q?si=owVZ7N4M5XlRCGAU"),
+            SongSuggestion("Channa Mereya", "Arijit Singh", "https://www.youtube.com/watch?v=_BCk3o4NxYQ"),
+            SongSuggestion("Tera Ban Jaunga", "Akhil Sachdeva & Tulsi Kumar", "https://youtu.be/Qdz5n1Xe5Qo?si=wald5ZpBeJVqc_9u"),
+            SongSuggestion("Pehla Nasha", "Udit Narayan & Sadhana Sargam", "https://m.youtube.com/watch?v=hRlGYdWInAU&pp=ygULI3BlaGxha2h1bWE%3D")
         )
+
+
     )
+
 
     fun getSongs(weatherCondition: String): List<SongSuggestion> {
         return weatherToSongs[weatherCondition] ?: emptyList()

@@ -70,6 +70,18 @@ import com.google.android.gms.location.LocationServices
 import mc.project.weatherapp.api.AirQuality
 import mc.project.weatherapp.api.Forecast
 import mc.project.weatherapp.api.Hour
+import android.location.Geocoder
+import android.net.Uri
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Place
+//import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.LocalContext
 import mc.project.weatherapp.api.WeatherResponse
 import mc.project.weatherapp.ui.theme.WeatherTheme
 import androidx.compose.material3.DropdownMenu
@@ -78,6 +90,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Switch
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.ui.viewinterop.AndroidView
+import java.util.Locale
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
@@ -218,9 +232,42 @@ fun WeatherApp(
                         MusicSuggestionsScreen(generalCondition)
                     }
                 }
+                4 -> {
+                    val city = viewModel.currentCity
+                    if (city != null) {
+                        WeatherNewsScreen(city)
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Location data not available", color = Color.Gray)
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+
+@Composable
+fun WeatherNewsScreen(city: String) {
+    val context = LocalContext.current
+    val query = "weather news ${city.lowercase()}"
+    val url = "https://www.google.com/search?q=${Uri.encode(query)}&tbm=nws"
+
+    AndroidView(
+        factory = {
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.javaScriptEnabled = true
+                loadUrl(url)
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable
@@ -292,59 +339,126 @@ fun WeatherTopBar(viewModel: WeatherViewModel) {
     var city by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
     val darkModeEnabled by viewModel.darkModeEnabled.observeAsState(false)
+    val cachedCities by viewModel.cachedCities.observeAsState(setOf())
+    var filteredCities by remember { mutableStateOf(cachedCities.toList()) }
 
-    TopAppBar(
-        title = { Text("Weather App") },
-        navigationIcon = {
-            IconButton(onClick = { showMenu = true }) {
-                Icon(Icons.Default.Settings, contentDescription = "Settings")
-//                Icon(
-//                    painter = painterResource(R.drawable.img), // Add your settings icon
-//                    contentDescription = "Settings"
-//                )
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("Dark Mode")
-                                Spacer(Modifier.width(8.dp))
-                                Switch(
-                                    checked = darkModeEnabled,
-                                    onCheckedChange = { viewModel.toggleDarkMode(it) }
-                                )
-                            }
-                        },
-                        onClick = { viewModel.toggleDarkMode(!darkModeEnabled) }
-                    )
+    Column {
+        TopAppBar(
+            title = { Text("Weather") },
+            navigationIcon = {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    //                Icon(
+                    //                    painter = painterResource(R.drawable.img), // Add your settings icon
+                    //                    contentDescription = "Settings"
+                    //                )
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("Dark Mode")
+                                    Spacer(Modifier.width(8.dp))
+                                    Switch(
+                                        checked = darkModeEnabled,
+                                        onCheckedChange = { viewModel.toggleDarkMode(it) }
+                                    )
+                                }
+                            },
+                            onClick = { viewModel.toggleDarkMode(!darkModeEnabled) }
+                        )
+                    }
+                }
+            },
+            actions = {
+                if (!showSearch) {
+                    IconButton(onClick = {
+                        viewModel.loadCachedCities()
+                        filteredCities = cachedCities.toList()
+                        showSearch = true
+                    }) {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
                 }
             }
-        },
-        actions = {
-            // Your existing search UI
-            if (showSearch) {
-                TextField(
-                    value = city,
-                    onValueChange = { city = it },
-                    placeholder = { Text("Enter city") },
-                    modifier = Modifier.padding(8.dp)
-                )
-                Button(onClick = {
-                    viewModel.fetchWeather(city)
-                    showSearch = false
-                }) {
-                    Text("Go")
+        )
+
+        if (showSearch) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = city,
+                        onValueChange = {
+                            city = it
+                            filteredCities = cachedCities.filter { c ->
+                                c.contains(city, ignoreCase = true)
+                            }
+                        },
+                        placeholder = { Text("Enter city") },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                    )
+                    Button(onClick = {
+                        viewModel.fetchWeather(city)
+                        showSearch = false
+                    }) {
+                        Text("Go")
+                    }
                 }
-            } else {
-                IconButton(onClick = { showSearch = true }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    items(filteredCities.toList()) { cachedCity ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    city = cachedCity
+                                    viewModel.fetchWeather(cachedCity)
+                                    showSearch = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = cachedCity,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            IconButton(
+                                onClick = {
+                                    viewModel.removeCachedCity(cachedCity)
+                                    filteredCities = cachedCities.filter { it.contains(city, true) }
+                                },
+                                modifier = Modifier.size(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Remove",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-    )
+    }
 }
+
 @Composable
 fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     NavigationBar {
@@ -372,6 +486,46 @@ fun BottomNavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             selected = selectedTab == 3,
             onClick = { onTabSelected(3) }
         )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Notifications, contentDescription = "News") },
+            label = { Text("News") },
+            selected = selectedTab == 4,
+            onClick = { onTabSelected(4) }
+        )
+    }
+}
+
+@Composable
+fun ErrorScreen(
+    message: String = "Something went wrong.",
+    onRetry: (() -> Unit)? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.Place,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier.size(96.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = message,
+            color = Color.Gray,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        if (onRetry != null) {
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
+        }
     }
 }
 
