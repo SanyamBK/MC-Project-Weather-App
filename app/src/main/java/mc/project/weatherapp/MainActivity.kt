@@ -44,8 +44,12 @@ import mc.project.weatherapp.ui.theme.WeatherTheme
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.ui.text.TextStyle
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -677,7 +681,7 @@ fun AirQualitySummary(airQuality: AirQualityX) {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "US EPA Index: ${airQuality.us_epa_index}",
+                text = "PM10: ${airQuality.pm10}",
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -742,30 +746,124 @@ fun DrivingDifficulty(current: Current) {
     }
 }
 
+/*
 @Composable
 fun ForecastScreen(forecast: Forecast) {
-    var selectedDayIndex by remember { mutableStateOf(0) }
-    val forecastDays = forecast.forecastday
-    val selectedDay = forecastDays.getOrNull(selectedDayIndex)
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        items(forecast.forecastday) { day ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .shadow(8.dp, RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = day.date,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(day.hour) { hour ->
+                            HourlyWeatherCard(hour)
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        if (forecast.forecastday.isEmpty()) {
+            item {
+                Text(
+                    text = "Forecast data not available",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+*/
+
+
+@Composable
+fun ForecastScreen(forecast: Forecast) {
+    val forecastDays = forecast.forecastday.take(3) // Limit to 3 days
+
+    // Helper function to get day name from date string
+    fun getDayName(date: String): String {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val localDate = LocalDate.parse(date, formatter)
+        return localDate.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
+
+//        return localDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        selectedDay?.let { day ->
-            LazyRow(modifier = Modifier.fillMaxWidth()) {
-                items(day.hour) { hour ->
-                    HourlyWeatherCard(hour)
+        if (forecastDays.isNotEmpty()) {
+            // Today
+            forecastDays.getOrNull(0)?.let { day ->
+                Text(
+                    text = "Today",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LazyRow(modifier = Modifier.fillMaxWidth()) {
+                    items(day.hour) { hour ->
+                        HourlyWeatherCard(hour)
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Tomorrow
+            forecastDays.getOrNull(1)?.let { day ->
+                Text(
+                    text = "Tomorrow",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LazyRow(modifier = Modifier.fillMaxWidth()) {
+                    items(day.hour) { hour ->
+                        HourlyWeatherCard(hour)
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Day of the week for the third day
+            forecastDays.getOrNull(2)?.let { day ->
+                Text(
+                    text = getDayName(day.date),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LazyRow(modifier = Modifier.fillMaxWidth()) {
+                    items(day.hour) { hour ->
+                        HourlyWeatherCard(hour)
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            LazyRow(modifier = Modifier.fillMaxWidth()) {
-                itemsIndexed(forecastDays) { index, forecastDay ->
-                    DayCard(
-                        date = forecastDay.date,
-                        isSelected = index == selectedDayIndex,
-                        onClick = { selectedDayIndex = index }
-                    )
-                }
-            }
-        } ?: run {
+        } else {
             Text(
                 text = "Forecast data not available",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
