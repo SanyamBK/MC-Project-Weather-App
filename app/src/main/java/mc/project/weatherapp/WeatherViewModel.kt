@@ -54,7 +54,8 @@ class WeatherViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     response.body()?.let {
                         _weatherState.value = NetworkResponse.Success(it)
-                        cacheCity(formattedCity) // ✅ Save the city name
+//                        cacheCity(formattedCity) // ✅ Save the city name
+                        cacheCity(currentCity?.lowercase() ?: "")
                     }
                 } else {
                     _weatherState.value = NetworkResponse.Error("Failed to Load data")
@@ -75,7 +76,7 @@ class WeatherViewModel : ViewModel() {
 
 
     fun loadCachedCities() {
-        // Optional: used to manually refresh the observer
+        // Optional: used to manually refresh the observercacheCity
         _cachedCities.value = _cachedCities.value ?: mutableSetOf()
     }
 
