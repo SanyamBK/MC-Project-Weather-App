@@ -85,12 +85,12 @@ WeatherApp is an Android application built with Jetpack Compose and Kotlin, desi
 
 1. **Clone the Repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/mrid07/WeatherApp
    ```
 
 2. **Add API Key**:
    - Obtain an API key from [WeatherAPI](https://www.weatherapi.com).
-   - Add the key to `BuildConfig.WEATHER_API_KEY` in the `build.gradle` file or as a local property.
+   - Add the key to `BuildConfig.WEATHER_API_KEY` in the `build.gradle` file or as a grade property.
 
 3. **Sync Project**:
    - Open the project in Android Studio.
