@@ -26,8 +26,8 @@ WeatherApp is an Android application built with Jetpack Compose and Kotlin, desi
    - Provides an autocomplete-like feature by displaying cached cities as suggestions during search.
    - Users can remove individual cached cities or clear the entire cache.
 
-### 4. **5-Day Weather Forecast**
-   - Displays a 5-day weather forecast with daily summaries.
+### 4. **3-Day Weather Forecast**
+   - Displays a 3-day weather forecast with daily summaries.
    - Includes hourly weather details for the selected day, showing temperature and condition icons.
 
 ### 5. **Air Quality Information**
