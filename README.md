@@ -57,6 +57,13 @@ WeatherApp is an Android application built with Jetpack Compose and Kotlin, desi
    - Uses Material 3 components for a consistent and visually appealing design.
    - Includes animations and elevation effects for cards and interactive elements.
 
+## App Preview
+
+| Splash Screen                                                                                                                            | Home (Weather)                                                                                                                            | Forecast                                                                                                                                   | Music                                                                                                                                   | News                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Splash Screen](https://github.com/SanyamBK/MC-Project-Weather-App/blob/main/screenshots/Screenshot%202025-07-27%20005139.png?raw=true) | ![Weather Screen](https://github.com/SanyamBK/MC-Project-Weather-App/blob/main/screenshots/Screenshot%202025-07-27%20005047.png?raw=true) | ![Forecast Screen](https://github.com/SanyamBK/MC-Project-Weather-App/blob/main/screenshots/Screenshot%202025-07-27%20005305.png?raw=true) | ![Music Screen](https://github.com/SanyamBK/MC-Project-Weather-App/blob/main/screenshots/Screenshot%202025-07-27%20005345.png?raw=true) | ![News Screen](https://github.com/SanyamBK/MC-Project-Weather-App/blob/main/screenshots/Screenshot%202025-07-27%20005414.png?raw=true) |
+
+
 ## Project Structure
 
 - **MainActivity.kt**: The main entry point of the app, responsible for setting up the UI, handling location permissions, and initializing the WeatherViewModel.
